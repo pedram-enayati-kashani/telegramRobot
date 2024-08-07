@@ -29,12 +29,31 @@ class TelegramBot
         $data = json_decode($output,true);
         curl_close($curl);
 
-        $this->sendMessage($chatId, round($data['current']['temp_c']));
+        // $this->sendMessage($chatId, round($data['current']['temp_c']));
+        $this->sendMessageWithReply($chatId, round($data['current']['temp_c']),$message['message_id']);
     }
 
     public function sendMessage($chatId, $text)
     {
         $url = $this->apiUrl . "sendMessage";
+        $data = [
+            'chat_id' => $chatId,
+            'text' => $text,
+        ];
+
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        $response = curl_exec($ch);
+        curl_close($ch);
+        return $response;
+    }
+
+    public function sendMessageWithReply($chatId, $text,$messageId)
+    {
+        $url = $this->apiUrl . "sendMessage?reply_to_message_id=".$messageId;
         $data = [
             'chat_id' => $chatId,
             'text' => $text,
@@ -57,3 +76,6 @@ $bot = new TelegramBot($botToken);
 
 $update = json_decode(file_get_contents("php://input"), true);
 $bot->handleUpdate($update);
+$ftp = fopen('debug.txt','w');
+fwrite($ftp,file_get_contents("php://input"));
+fclose($ftp);
