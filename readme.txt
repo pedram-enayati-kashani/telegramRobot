@@ -1,1 +1,0 @@
-salam man as file readme omadam
